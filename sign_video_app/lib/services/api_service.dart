@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://127.0.0.1:5000";
+  static const String baseUrl = "http://localhost:5000";
 
   static String? token;
 
-  // ================= SAVE TOKEN =================
+  //SAVE TOKEN 
   static Future<void> saveToken(String jwt) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("token", jwt);
@@ -25,7 +25,7 @@ class ApiService {
     token = null;
   }
 
-  // ================= REGISTER =================
+  //REGISTER
   static Future<http.Response> register(
       String schoolName,
       String district,
@@ -45,7 +45,7 @@ class ApiService {
     );
   }
 
-  // ================= LOGIN =================
+  //LOGIN
   static Future<bool> login(String email, String password) async {
     var response = await http.post(
       Uri.parse("$baseUrl/login"),
