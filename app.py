@@ -16,7 +16,7 @@ from sqlalchemy import func
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, expose_headers=['Authorization'])
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/sign_video_db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -307,7 +307,7 @@ def login():
     if not school or not bcrypt.check_password_hash(school.password_hash, password):
         return jsonify({"error": "Invalid credentials"}), 401
     
-    access_token = create_access_token(identity=school.school_id)
+    access_token = create_access_token(identity=str(school.school_id))
     
     return jsonify({
         "token": access_token,
@@ -346,7 +346,7 @@ def get_current_school():
 @app.route('/upload', methods=['POST'])
 @jwt_required()
 def upload_video():
-    school_id = get_jwt_identity()
+    school_id = int(get_jwt_identity())
     
     title = request.form.get('title')
     sign_category = request.form.get('sign_category')
