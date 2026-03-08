@@ -112,7 +112,8 @@ class ApiService {
     String title,
     String signCategory,
     String signName,
-    String filePath,
+    List<int> fileBytes,
+    String fileName,
     String captureDevice,
   ) async {
     try {
@@ -128,11 +129,17 @@ class ApiService {
       request.fields['sign_name'] = signName;
       request.fields['capture_device'] = captureDevice;
 
-      request.files.add(await http.MultipartFile.fromPath('file', filePath));
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        fileBytes,
+        filename: fileName,
+      ));
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
-
+      
+      print("Upload response: ${response.statusCode} - ${response.body}");
+      
       return response.statusCode == 200;
     } catch (e) {
       print("Upload error: $e");
