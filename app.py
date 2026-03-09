@@ -653,6 +653,49 @@ def school_map():
 
 
 # ============================================
+# VIDEO LIST ENDPOINT
+# ============================================
+
+@app.route('/videos', methods=['GET'])
+def get_videos():
+    """Returns list of all uploaded videos with their details"""
+    videos = db.session.query(
+        DimVideo.video_id,
+        DimVideo.title,
+        DimVideo.file_path,
+        DimVideo.capture_device,
+        DimVideo.upload_date,
+        DimVideo.dataset_version,
+        DimSign.sign_name,
+        DimSign.medical_category,
+        DimSchool.school_name
+    ).join(
+        FactSignVideo, FactSignVideo.video_id == DimVideo.video_id
+    ).join(
+        DimSign, DimSign.sign_id == FactSignVideo.sign_id
+    ).join(
+        DimSchool, DimSchool.school_id == FactSignVideo.school_id
+    ).order_by(
+        DimVideo.upload_date.desc()
+    ).all()
+    
+    return jsonify([
+        {
+            "video_id": v.video_id,
+            "title": v.title,
+            "file_path": v.file_path,
+            "capture_device": v.capture_device,
+            "upload_date": v.upload_date.isoformat() if v.upload_date else None,
+            "dataset_version": v.dataset_version,
+            "gloss": v.sign_name,
+            "category": v.medical_category,
+            "school_name": v.school_name
+        }
+        for v in videos
+    ]), 200
+
+
+# ============================================
 # INFERENCE LOG ENDPOINT (Future)
 # ============================================
 
