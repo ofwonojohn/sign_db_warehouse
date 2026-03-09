@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import '../services/api_service.dart';
 
 class UploadScreen extends StatefulWidget {
@@ -12,31 +13,108 @@ class UploadScreen extends StatefulWidget {
 class _UploadScreenState extends State<UploadScreen> {
   final titleController = TextEditingController();
   String? selectedCategory;
-  String? selectedSignName;
+  String? selectedGloss;
   PlatformFile? selectedFile;
   bool isUploading = false;
 
-  // Pre-defined sign categories and names
-  final List<String> categories = [
-    'Symptoms',
-    'Diagnosis',
-    'Basic Expression',
-    'Emergency',
-    'Medical Personnel',
-    'Medical Facility',
-    'Treatment',
-    'Basic Need',
-  ];
+  // Updated sign categories - Health and Education
+  final List<String> categories = ['Health', 'Education'];
 
-  final Map<String, List<String>> signNames = {
-    'Symptoms': ['Headache', 'Fever', 'Cough', 'Stomach Pain', 'Pain', 'Tired'],
-    'Diagnosis': ['Diabetes', 'Malaria', 'Typhoid', 'HIV'],
-    'Basic Expression': ['Yes', 'No', 'Please', 'Thank You'],
-    'Emergency': ['Help', 'Emergency'],
-    'Medical Personnel': ['Doctor', 'Nurse'],
-    'Medical Facility': ['Hospital', 'Clinic', 'Pharmacy'],
-    'Treatment': ['Medicine', 'Injection', 'Surgery'],
-    'Basic Need': ['Water', 'Food', 'Bathroom'],
+  // Updated gloss names based on category
+  final Map<String, List<String>> glossNames = {
+    'Health': [
+      'Fever',
+      'Cough',
+      'Headache',
+      'Stomach Ache',
+      'Chest Pain',
+      'Dizziness',
+      'Nausea',
+      'Fatigue',
+      'Shortness of Breath',
+      'Body Weakness',
+      'Loss of Appetite',
+      'Weight Loss',
+      'Vision Problems',
+      'Hearing Problems',
+      'Skin Rash',
+      'Joint Pain',
+      'Back Pain',
+      'Toothache',
+      'Menstrual Pain',
+      'Pregnancy',
+      'Diabetes',
+      'Hypertension',
+      'Malaria',
+      'Typhoid',
+      'HIV/AIDS',
+      'Tuberculosis',
+      'Yes',
+      'No',
+      'Help',
+      'Emergency',
+      'Doctor',
+      'Nurse',
+      'Hospital',
+      'Medicine',
+      'Injection',
+      'Blood Test',
+      'X-Ray',
+      'Surgery',
+      'Ambulance',
+      'Pharmacy',
+      'Health Center',
+      'Clinic',
+    ],
+    'Education': [
+      'Student',
+      'Teacher',
+      'School',
+      'Class',
+      'Book',
+      'Pen',
+      'Notebook',
+      'Paper',
+      'Write',
+      'Read',
+      'Study',
+      'Learn',
+      'Teach',
+      'Exam',
+      'Test',
+      'Quiz',
+      'Homework',
+      'Project',
+      'Science',
+      'Math',
+      'English',
+      'Social Studies',
+      'Geography',
+      'History',
+      'Art',
+      'Music',
+      'Sports',
+      'Library',
+      'Principal',
+      'Headmaster',
+      'Office',
+      'Playground',
+      'Uniform',
+      'Bag',
+      'Chair',
+      'Desk',
+      'Blackboard',
+      'Chalk',
+      'Map',
+      'Globe',
+      'Computer',
+      'Understand',
+      'Remember',
+      'Think',
+      'Question',
+      'Answer',
+      'Explain',
+    ],
   };
 
   Future<void> pickVideo() async {
@@ -53,21 +131,30 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   Future<void> uploadVideo() async {
-    if (titleController.text.isEmpty || selectedCategory == null || 
-        selectedSignName == null || selectedFile == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Please fill in all fields and select a video")));
+    if (titleController.text.isEmpty ||
+        selectedCategory == null ||
+        selectedGloss == null ||
+        selectedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill in all fields and select a video"),
+        ),
+      );
       return;
     }
 
     setState(() => isUploading = true);
 
     try {
+      // Read file bytes
+      final file = File(selectedFile!.path!);
+      final fileBytes = await file.readAsBytes();
+
       bool success = await ApiService.uploadVideo(
         titleController.text,
         selectedCategory!,
-        selectedSignName!,
-        selectedFile!.bytes!,
+        selectedGloss!,
+        fileBytes,
         selectedFile!.name,
         'Web Upload',
       );
@@ -75,24 +162,27 @@ class _UploadScreenState extends State<UploadScreen> {
       setState(() => isUploading = false);
 
       if (success) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Video uploaded successfully!")));
-        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video uploaded successfully!")),
+        );
+
         // Clear form
         setState(() {
           titleController.clear();
           selectedCategory = null;
-          selectedSignName = null;
+          selectedGloss = null;
           selectedFile = null;
         });
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Upload failed. Please try again.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Upload failed. Please try again.")),
+        );
       }
     } catch (e) {
       setState(() => isUploading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -106,10 +196,7 @@ class _UploadScreenState extends State<UploadScreen> {
           children: [
             const Text(
               "Upload Sign Language Video",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -136,12 +223,12 @@ class _UploadScreenState extends State<UploadScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title
+                      // Video Title
                       TextField(
                         controller: titleController,
                         decoration: InputDecoration(
                           labelText: "Video Title",
-                          hintText: "e.g., Sign for headache - Patient demo",
+                          hintText: "e.g., Sign for fever - Patient demo",
                           prefixIcon: const Icon(Icons.title),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -149,8 +236,8 @@ class _UploadScreenState extends State<UploadScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
-                      // Category Dropdown
+
+                      // Sign Category - Health or Education
                       DropdownButtonFormField<String>(
                         value: selectedCategory,
                         decoration: InputDecoration(
@@ -160,45 +247,54 @@ class _UploadScreenState extends State<UploadScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        items: categories.map((cat) => DropdownMenuItem(
-                          value: cat,
-                          child: Text(cat),
-                        )).toList(),
+                        items: categories
+                            .map(
+                              (cat) => DropdownMenuItem(
+                                value: cat,
+                                child: Text(cat),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (value) {
                           setState(() {
                             selectedCategory = value;
-                            selectedSignName = null;
+                            selectedGloss = null;
                           });
                         },
                       ),
                       const SizedBox(height: 20),
-                      
-                      // Sign Name Dropdown
+
+                      // Gloss - Meaning of the sign
                       DropdownButtonFormField<String>(
-                        value: selectedSignName,
+                        value: selectedGloss,
                         decoration: InputDecoration(
-                          labelText: "Sign Name",
+                          labelText: "Gloss",
+                          hintText: "Meaning of the sign video",
                           prefixIcon: const Icon(Icons.sign_language),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         items: selectedCategory != null
-                            ? (signNames[selectedCategory] ?? []).map((sign) => DropdownMenuItem(
-                                value: sign,
-                                child: Text(sign),
-                              )).toList()
+                            ? (glossNames[selectedCategory] ?? [])
+                                  .map(
+                                    (gloss) => DropdownMenuItem(
+                                      value: gloss,
+                                      child: Text(gloss),
+                                    ),
+                                  )
+                                  .toList()
                             : [],
                         onChanged: selectedCategory == null
                             ? null
                             : (value) {
                                 setState(() {
-                                  selectedSignName = value;
+                                  selectedGloss = value;
                                 });
                               },
                       ),
                       const SizedBox(height: 25),
-                      
+
                       // File Selection
                       Container(
                         width: double.infinity,
@@ -210,7 +306,11 @@ class _UploadScreenState extends State<UploadScreen> {
                         child: Column(
                           children: [
                             if (selectedFile == null) ...[
-                              Icon(Icons.video_file, size: 48, color: Colors.grey[400]),
+                              Icon(
+                                Icons.video_file,
+                                size: 48,
+                                color: Colors.grey[400],
+                              ),
                               const SizedBox(height: 10),
                               Text(
                                 "No video selected",
@@ -227,15 +327,24 @@ class _UploadScreenState extends State<UploadScreen> {
                                 ),
                               ),
                             ] else ...[
-                              Icon(Icons.check_circle, size: 48, color: Colors.green[400]),
+                              Icon(
+                                Icons.check_circle,
+                                size: 48,
+                                color: Colors.green[400],
+                              ),
                               const SizedBox(height: 10),
                               Text(
                                 selectedFile!.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Text(
                                 "${(selectedFile!.size / 1024 / 1024).toStringAsFixed(2)} MB",
-                                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
                               ),
                               const SizedBox(height: 15),
                               TextButton.icon(
@@ -248,7 +357,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      
+
                       // Upload Button
                       SizedBox(
                         width: double.infinity,
