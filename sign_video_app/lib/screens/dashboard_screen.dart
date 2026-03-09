@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'upload_screen.dart';
+import 'videos_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,7 +13,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,10 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       Text(
                         "Uganda Data Platform",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
@@ -61,6 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _navItem(3, Icons.speed, "Real-time Monitoring"),
                       _navItem(4, Icons.map, "School Map"),
                       _navItem(5, Icons.cloud_upload, "Upload Videos"),
+                      _navItem(6, Icons.video_library, "My Videos"),
                     ],
                   ),
                 ),
@@ -73,7 +72,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       if (mounted) {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
                         );
                       }
                     },
@@ -95,7 +96,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 // Top App Bar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 15,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -121,7 +125,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Chip(
                           avatar: const CircleAvatar(
                             backgroundColor: Color(0xFF1E88E5),
-                            child: Icon(Icons.school, color: Colors.white, size: 16),
+                            child: Icon(
+                              Icons.school,
+                              color: Colors.white,
+                              size: 16,
+                            ),
                           ),
                           label: Text(ApiService.schoolName!),
                           backgroundColor: const Color(0xFFE3F2FD),
@@ -130,9 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 // Content
-                Expanded(
-                  child: _buildContent(),
-                ),
+                Expanded(child: _buildContent()),
               ],
             ),
           ),
@@ -165,7 +171,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   label,
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white70,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ],
@@ -190,6 +198,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return "School Map";
       case 5:
         return "Upload Videos";
+      case 6:
+        return "My Videos";
       default:
         return "Dashboard";
     }
@@ -209,6 +219,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return const SchoolMapScreen();
       case 5:
         return const UploadScreen();
+      case 6:
+        return const VideosListScreen();
       default:
         return const DashboardOverview();
     }
@@ -243,7 +255,7 @@ class _DashboardOverviewState extends State<DashboardOverview> {
       final summaryData = await ApiService.getDashboardSummary();
       final region = await ApiService.getVideosPerRegion();
       final schools = await ApiService.getVideosPerSchool();
-      
+
       if (mounted) {
         setState(() {
           summary = summaryData;
@@ -315,7 +327,7 @@ class _DashboardOverviewState extends State<DashboardOverview> {
             ],
           ),
           const SizedBox(height: 30),
-          
+
           // Data Tables Row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,10 +357,16 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                               DataColumn(label: Text("Region")),
                               DataColumn(label: Text("Videos"), numeric: true),
                             ],
-                            rows: regionData.map<DataRow>((r) => DataRow(cells: [
-                              DataCell(Text(r['region'] ?? '')),
-                              DataCell(Text("${r['count'] ?? 0}")),
-                            ])).toList(),
+                            rows: regionData
+                                .map<DataRow>(
+                                  (r) => DataRow(
+                                    cells: [
+                                      DataCell(Text(r['region'] ?? '')),
+                                      DataCell(Text("${r['count'] ?? 0}")),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
                           ),
                       ],
                     ),
@@ -381,10 +399,19 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                               DataColumn(label: Text("School")),
                               DataColumn(label: Text("Videos"), numeric: true),
                             ],
-                            rows: schoolData.take(10).map<DataRow>((s) => DataRow(cells: [
-                              DataCell(Text(s['school_name'] ?? '')),
-                              DataCell(Text("${s['video_count'] ?? 0}")),
-                            ])).toList(),
+                            rows: schoolData
+                                .take(10)
+                                .map<DataRow>(
+                                  (s) => DataRow(
+                                    cells: [
+                                      DataCell(Text(s['school_name'] ?? '')),
+                                      DataCell(
+                                        Text("${s['video_count'] ?? 0}"),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
                           ),
                       ],
                     ),
@@ -394,7 +421,7 @@ class _DashboardOverviewState extends State<DashboardOverview> {
             ],
           ),
           const SizedBox(height: 30),
-          
+
           // Latency & FPS Placeholder Cards
           Row(
             children: [
@@ -414,7 +441,10 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                         const SizedBox(height: 5),
                         Text(
                           "Pending Implementation",
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Chip(
@@ -434,7 +464,11 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        const Icon(Icons.videocam, size: 40, color: Colors.grey),
+                        const Icon(
+                          Icons.videocam,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(height: 10),
                         const Text(
                           "Average FPS",
@@ -443,7 +477,10 @@ class _DashboardOverviewState extends State<DashboardOverview> {
                         const SizedBox(height: 5),
                         Text(
                           "Pending Implementation",
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Chip(
@@ -462,7 +499,13 @@ class _DashboardOverviewState extends State<DashboardOverview> {
     );
   }
 
-  Widget _summaryCard(String title, String value, IconData icon, Color color, {String? subtitle}) {
+  Widget _summaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    String? subtitle,
+  }) {
     return Container(
       width: 200,
       padding: const EdgeInsets.all(20),
@@ -497,21 +540,12 @@ class _DashboardOverviewState extends State<DashboardOverview> {
               color: Color(0xFF1E293B),
             ),
           ),
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
-          ),
+          Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
           if (subtitle != null) ...[
             const SizedBox(height: 5),
             Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
             ),
           ],
         ],
@@ -578,10 +612,14 @@ class _ModelPerformanceScreenState extends State<ModelPerformanceScreen> {
                         labelText: "Model Version",
                         border: OutlineInputBorder(),
                       ),
-                      items: models.map((m) => DropdownMenuItem<String>(
-                        value: m['model_version'] as String,
-                        child: Text(m['model_version'] ?? ''),
-                      )).toList(),
+                      items: models
+                          .map(
+                            (m) => DropdownMenuItem<String>(
+                              value: m['model_version'] as String,
+                              child: Text(m['model_version'] ?? ''),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (value) {},
                     ),
                   ),
@@ -608,8 +646,14 @@ class _ModelPerformanceScreenState extends State<ModelPerformanceScreen> {
                       ),
                       items: const [
                         DropdownMenuItem(value: "all", child: Text("All Time")),
-                        DropdownMenuItem(value: "30d", child: Text("Last 30 Days")),
-                        DropdownMenuItem(value: "7d", child: Text("Last 7 Days")),
+                        DropdownMenuItem(
+                          value: "30d",
+                          child: Text("Last 30 Days"),
+                        ),
+                        DropdownMenuItem(
+                          value: "7d",
+                          child: Text("Last 7 Days"),
+                        ),
                       ],
                       onChanged: (value) {},
                     ),
@@ -619,23 +663,39 @@ class _ModelPerformanceScreenState extends State<ModelPerformanceScreen> {
             ),
           ),
           const SizedBox(height: 25),
-          
+
           // Metrics Cards
           if (models.isNotEmpty) ...[
             Row(
               children: [
-                _metricCard("Accuracy", models[0]['accuracy'] ?? 0.0, const Color(0xFF1E88E5)),
+                _metricCard(
+                  "Accuracy",
+                  models[0]['accuracy'] ?? 0.0,
+                  const Color(0xFF1E88E5),
+                ),
                 const SizedBox(width: 15),
-                _metricCard("Precision", models[0]['precision'] ?? 0.0, const Color(0xFF43A047)),
+                _metricCard(
+                  "Precision",
+                  models[0]['precision'] ?? 0.0,
+                  const Color(0xFF43A047),
+                ),
                 const SizedBox(width: 15),
-                _metricCard("Recall", models[0]['recall'] ?? 0.0, const Color(0xFFFF9800)),
+                _metricCard(
+                  "Recall",
+                  models[0]['recall'] ?? 0.0,
+                  const Color(0xFFFF9800),
+                ),
                 const SizedBox(width: 15),
-                _metricCard("F1 Score", models[0]['f1_score'] ?? 0.0, const Color(0xFF9C27B0)),
+                _metricCard(
+                  "F1 Score",
+                  models[0]['f1_score'] ?? 0.0,
+                  const Color(0xFF9C27B0),
+                ),
               ],
             ),
             const SizedBox(height: 25),
           ],
-          
+
           // Confusion Matrix Placeholder
           Card(
             child: Padding(
@@ -677,7 +737,7 @@ class _ModelPerformanceScreenState extends State<ModelPerformanceScreen> {
             ),
           ),
           const SizedBox(height: 25),
-          
+
           // Model History
           Card(
             child: Padding(
@@ -701,13 +761,28 @@ class _ModelPerformanceScreenState extends State<ModelPerformanceScreen> {
                         DataColumn(label: Text("Accuracy")),
                         DataColumn(label: Text("Created")),
                       ],
-                      rows: models.map((m) => DataRow(cells: [
-                        DataCell(Text(m['model_name'] ?? '')),
-                        DataCell(Text(m['model_version'] ?? '')),
-                        DataCell(Text(m['training_dataset'] ?? '')),
-                        DataCell(Text("${((m['accuracy'] ?? 0) * 100).toStringAsFixed(1)}%")),
-                        DataCell(Text(m['created_at']?.toString().split('T')[0] ?? '')),
-                      ])).toList(),
+                      rows: models
+                          .map(
+                            (m) => DataRow(
+                              cells: [
+                                DataCell(Text(m['model_name'] ?? '')),
+                                DataCell(Text(m['model_version'] ?? '')),
+                                DataCell(Text(m['training_dataset'] ?? '')),
+                                DataCell(
+                                  Text(
+                                    "${((m['accuracy'] ?? 0) * 100).toStringAsFixed(1)}%",
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    m['created_at']?.toString().split('T')[0] ??
+                                        '',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          .toList(),
                     ),
                 ],
               ),
@@ -810,7 +885,10 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
                     ...signDistribution.entries.map((entry) {
                       final category = entry.key;
                       final signs = entry.value as List;
-                      final total = signs.fold<int>(0, (sum, item) => sum + (item['count'] ?? 0) as int);
+                      final total = signs.fold<int>(
+                        0,
+                        (sum, item) => sum + (item['count'] ?? 0) as int,
+                      );
                       return ExpansionTile(
                         title: Text(category),
                         subtitle: Text("$total videos"),
@@ -827,7 +905,7 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
             ),
           ),
           const SizedBox(height: 25),
-          
+
           // Medical Category Coverage
           Card(
             child: Padding(
@@ -845,17 +923,25 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
                     runSpacing: 10,
                     children: signDistribution.keys.map((category) {
                       final signs = signDistribution[category] as List;
-                      final total = signs.fold<int>(0, (sum, item) => sum + (item['count'] ?? 0) as int);
+                      final total = signs.fold<int>(
+                        0,
+                        (sum, item) => sum + (item['count'] ?? 0) as int,
+                      );
                       return Chip(
                         avatar: CircleAvatar(
                           backgroundColor: _getCategoryColor(category),
                           child: Text(
                             "$total",
-                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
                           ),
                         ),
                         label: Text(category.toString()),
-                        backgroundColor: _getCategoryColor(category).withOpacity(0.1),
+                        backgroundColor: _getCategoryColor(
+                          category,
+                        ).withOpacity(0.1),
                       );
                     }).toList(),
                   ),
@@ -864,7 +950,7 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
             ),
           ),
           const SizedBox(height: 25),
-          
+
           // Low Sample Warnings
           Card(
             color: Colors.amber[50],
@@ -879,7 +965,10 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
                       SizedBox(width: 10),
                       Text(
                         "Dataset Balance Warnings",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -899,7 +988,7 @@ class _DatasetCoverageScreenState extends State<DatasetCoverageScreen> {
       ),
     );
   }
-  
+
   Color _getCategoryColor(String category) {
     final colors = {
       'Symptoms': const Color(0xFF1E88E5),
@@ -923,7 +1012,8 @@ class RealTimeMonitoringScreen extends StatefulWidget {
   const RealTimeMonitoringScreen({super.key});
 
   @override
-  State<RealTimeMonitoringScreen> createState() => _RealTimeMonitoringScreenState();
+  State<RealTimeMonitoringScreen> createState() =>
+      _RealTimeMonitoringScreenState();
 }
 
 class _RealTimeMonitoringScreenState extends State<RealTimeMonitoringScreen> {
@@ -968,7 +1058,10 @@ class _RealTimeMonitoringScreenState extends State<RealTimeMonitoringScreen> {
                     children: [
                       const Text(
                         "Inference Logs",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const Spacer(),
                       ElevatedButton.icon(
@@ -990,7 +1083,11 @@ class _RealTimeMonitoringScreenState extends State<RealTimeMonitoringScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.table_chart, size: 50, color: Colors.grey),
+                            Icon(
+                              Icons.table_chart,
+                              size: 50,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 10),
                             Text(
                               "No inference logs yet",
@@ -998,7 +1095,10 @@ class _RealTimeMonitoringScreenState extends State<RealTimeMonitoringScreen> {
                             ),
                             Text(
                               "This feature is ready for future AI model integration",
-                              style: TextStyle(color: Colors.grey, fontSize: 12),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -1013,17 +1113,39 @@ class _RealTimeMonitoringScreenState extends State<RealTimeMonitoringScreen> {
                         DataColumn(label: Text("Device")),
                         DataColumn(label: Text("Latency")),
                       ],
-                      rows: logs.map((log) => DataRow(cells: [
-                        DataCell(Text(log['timestamp']?.toString().split('.').first ?? '')),
-                        DataCell(Text(log['predicted_sign'] ?? '-')),
-                        DataCell(Text(log['confidence_score'] != null 
-                            ? "${(log['confidence_score'] * 100).toStringAsFixed(1)}%" 
-                            : '-')),
-                        DataCell(Text(log['device_type'] ?? '-')),
-                        DataCell(Text(log['latency_ms'] != null 
-                            ? "${log['latency_ms']}ms" 
-                            : '-')),
-                      ])).toList(),
+                      rows: logs
+                          .map(
+                            (log) => DataRow(
+                              cells: [
+                                DataCell(
+                                  Text(
+                                    log['timestamp']
+                                            ?.toString()
+                                            .split('.')
+                                            .first ??
+                                        '',
+                                  ),
+                                ),
+                                DataCell(Text(log['predicted_sign'] ?? '-')),
+                                DataCell(
+                                  Text(
+                                    log['confidence_score'] != null
+                                        ? "${(log['confidence_score'] * 100).toStringAsFixed(1)}%"
+                                        : '-',
+                                  ),
+                                ),
+                                DataCell(Text(log['device_type'] ?? '-')),
+                                DataCell(
+                                  Text(
+                                    log['latency_ms'] != null
+                                        ? "${log['latency_ms']}ms"
+                                        : '-',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          .toList(),
                     ),
                 ],
               ),
@@ -1130,12 +1252,15 @@ class _SchoolMapScreenState extends State<SchoolMapScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           school['school_name'] ?? '',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                         Text(
                                           "${school['region'] ?? ''}, ${school['district'] ?? ''}",
