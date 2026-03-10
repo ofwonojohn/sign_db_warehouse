@@ -1,5 +1,8 @@
 flask
+flask-cors
+flask-jwt-extended
 flask-sqlalchemy
+flask-bcrypt
 psycopg2-binary
 sqlalchemy
 python-dotenv
