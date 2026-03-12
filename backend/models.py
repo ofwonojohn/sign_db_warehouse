@@ -26,7 +26,7 @@ class DimDate(db.Model):
 class DimVideo(db.Model):
     __tablename__ = 'dim_video'
     video_id = db.Column(db.Integer, primary_key=True)
-    file_path = db.Column(db.Text)
+    video_url = db.Column(db.Text)
     language = db.Column(db.String(50))
     gloss_label = db.Column(db.String(100))
     sentence_type = db.Column(db.String(50))

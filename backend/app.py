@@ -12,6 +12,15 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy import func
+import cloudinary
+import cloudinary.uploader
+import os
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 load_dotenv()
 
@@ -81,7 +90,7 @@ class DimVideo(db.Model):
     __tablename__ = "dim_video"
     video_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
-    file_path = db.Column(db.String(500), nullable=False)
+    video_url = db.Column(db.String(500), nullable=False)
     capture_device = db.Column(db.String(100), nullable=True)
     upload_date = db.Column(db.Date, default=datetime.today().date)
     dataset_version = db.Column(db.String(50), default="v1.0")
@@ -337,11 +346,12 @@ def upload_video():
     if not all([title, sign_category, sign_name]):
         return jsonify({"error": "Title, sign category, and sign name are required"}), 400
     
-    # Save video file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{timestamp}_{file.filename}"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+    # Upload video to Cloudinary
+    upload_result = cloudinary.uploader.upload(
+        file,
+        resource_type="video"
+    )
+    video_url = upload_result["secure_url"]
     
     # Get or create sign
     sign = DimSign.query.filter_by(sign_name=sign_name, medical_category=sign_category).first()
@@ -353,7 +363,7 @@ def upload_video():
     # Create video record
     video = DimVideo(
         title=title,
-        file_path=filepath,
+        video_url=video_url,
         capture_device=capture_device,
         upload_date=datetime.today().date()
     )
